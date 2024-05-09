@@ -92,9 +92,11 @@ for k, v in results.items():
 # Create the DataFrame
 df = pd.DataFrame(series_dict)
 
-df.to_csv(f"iris_lr{lr}_iter{it}.csv", index=False)
-# lowest_cost_algo = min(results.items(), key=lambda x: x[1])
-# print("lowest_cost_algo: ", lowest_cost_algo)
+df.to_csv(f"C:/Users/ERDG/Documents/repos/results/iris_lr{lr}_iter{it}.csv", index=False)
+
+times_df = pd.DataFrame.from_dict(times_dict)
+times_df.to_csv(f"C:/Users/ERDG/Documents/repos/results/TIMES_iris_lr{lr}_iter{it}.csv", index=False)
+
 
 print(f"GD: {len(gradient_costs)}\nSGD: {len(stochastic_gradient_descent_costs)}\nProposed: {len(proposed_costs)}")
 
