@@ -8,8 +8,8 @@ import math
 from sklearn import datasets
 
 # Load data and show the first rows
-df = pd.read_csv("Advertising.csv")
-df.head()
+# df = pd.read_csv("Advertising.csv")
+# df.head()
 
 iris = datasets.load_iris()
 # Slice data (only the first three features) and target
@@ -53,7 +53,7 @@ def update_theta(x, y, y_hat, b_0, theta_o, learning_rate):
     return b_1, theta_1, db, dw
 
 # Modified gradient descent step
-def update_theta_modified(x, y, y_hat, b_0, theta_o, learning_rate, wpr, bpr, k):
+def update_theta_proposed(x, y, y_hat, b_0, theta_o, learning_rate, wpr, bpr, k):
     db = (np.sum(y_hat - y) * 2) / len(y)
     dw = (np.dot((y_hat - y), x) * 2) / len(y)
     b_1 = b_0 - learning_rate * (k * db + (1 - k) * bpr)
@@ -91,7 +91,7 @@ def stochastic_gradient_descent(iterations, b, theta, lr):
     
     return costs, weights
 
-# Modified gradient descent function
+# Proposed gradient descent function
 def proposed_descent(iterations, b, theta, lr):
     
     costs = []
@@ -111,7 +111,7 @@ def proposed_descent(iterations, b, theta, lr):
             Y_hat = predict_Y(b, theta, X)
             costs.append(get_cost(Y, Y_hat))
             weights.append(theta)
-            b, theta, db0, dw0 = update_theta_modified(X, Y, Y_hat, b, theta, lr, md_list[i - 1], bd_list[i - 1], 0.5)
+            b, theta, db0, dw0 = update_theta_proposed(X, Y, Y_hat, b, theta, lr, md_list[i - 1], bd_list[i - 1], 0.5)
             md_list[i] = dw0
             bd_list[i] = db0
                        
@@ -141,7 +141,7 @@ def gradient_descent(iterations, b, theta, lr):
 # Define the number of iterations, bias, weights, and learning rate
 it = 45_000
 bias, weig = initialize(X.shape[1])
-lr = 0.01
+lr = 0.0001
 
 times_dict = {}
 
@@ -166,43 +166,43 @@ times_dict["stochastic_time_elapsed"] = stochastic_time_elapsed
 
 ## Getting fastest algo
 fastest_algo = min(times_dict.items(), key=lambda x: x[1])
-print(times_dict)
+print("fastest_algo: ", fastest_algo)
 
 costs_dict = {"stochastic_gradient_descent_costs":stochastic_gradient_descent_costs[-1], 
               "gradient_costs":gradient_costs[-1],
               "proposed_costs":proposed_costs[-1]}
 
-lowest_cost_algo = min(times_dict.items(), key=lambda x: x[1])
-print(costs_dict)
+lowest_cost_algo = min(costs_dict.items(), key=lambda x: x[1])
+print("lowest_cost_algo: ", lowest_cost_algo)
 
-# Create figure with two subplots in one row
-fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 5))
+# # Create figure with two subplots in one row
+# fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 5))
 
-# Plot modified function in the first subplot
-COLOR = 'black'
-ax1.plot(range(len(proposed_costs)), proposed_costs, color=COLOR)
-ax1.scatter(range(len(proposed_costs)), proposed_costs, marker='o', color=COLOR)
-ax1.set_xlabel('Weights')
-ax1.set_ylabel('Modified results', color=COLOR)
-ax1.tick_params(axis='y', labelcolor=COLOR)
+# # Plot modified function in the first subplot
+# COLOR = 'black'
+# ax1.plot(range(len(proposed_costs)), proposed_costs, color=COLOR)
+# ax1.scatter(range(len(proposed_costs)), proposed_costs, marker='o', color=COLOR)
+# ax1.set_xlabel('Costs')
+# ax1.set_ylabel('Modified results', color=COLOR)
+# ax1.tick_params(axis='y', labelcolor=COLOR)
 
-# Plot gradient descent function in the second subplot
-COLOR = 'tab:blue'
-ax2.plot(range(len(gradient_costs)), gradient_costs, color=COLOR)
-ax2.scatter(range(len(gradient_costs)), gradient_costs, marker='o', color=COLOR)
-ax2.set_xlabel('Weights')
-ax2.set_ylabel('gradient descent gradients', color=COLOR)
-ax2.set_title('Values of modified and gradient descent over iterations')
-ax2.tick_params(axis='y', labelcolor=COLOR)
+# # Plot gradient descent function in the second subplot
+# COLOR = 'tab:blue'
+# ax2.plot(range(len(gradient_costs)), gradient_costs, color=COLOR)
+# ax2.scatter(range(len(gradient_costs)), gradient_costs, marker='o', color=COLOR)
+# ax2.set_xlabel('Costs')
+# ax2.set_ylabel('gradient descent gradients', color=COLOR)
+# ax2.set_title('Values of modified and gradient descent over iterations')
+# ax2.tick_params(axis='y', labelcolor=COLOR)
 
-# Plot stochastic gradient descent function in the second subplot
-COLOR = 'tab:blue'
-ax3.plot(range(len(stochastic_gradient_descent_costs)), stochastic_gradient_descent_costs, color=COLOR)
-ax3.scatter(range(len(stochastic_gradient_descent_costs)), stochastic_gradient_descent_costs, marker='o', color=COLOR)
-ax3.set_xlabel('Weights')
-ax3.set_ylabel('stochastic gradient descent gradients', color=COLOR)
-ax3.set_title('All Algos')
-ax3.tick_params(axis='y', labelcolor=COLOR)
+# # Plot stochastic gradient descent function in the second subplot
+# COLOR = 'tab:blue'
+# ax3.plot(range(len(stochastic_gradient_descent_costs)), stochastic_gradient_descent_costs, color=COLOR)
+# ax3.scatter(range(len(stochastic_gradient_descent_costs)), stochastic_gradient_descent_costs, marker='o', color=COLOR)
+# ax3.set_xlabel('Costs')
+# ax3.set_ylabel('stochastic gradient descent gradients', color=COLOR)
+# ax3.set_title('All Algos')
+# ax3.tick_params(axis='y', labelcolor=COLOR)
 
-# Show the plots
-plt.show()
+# # Show the plots
+# plt.show()

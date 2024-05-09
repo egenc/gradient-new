@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 import random
 import math
 from sklearn import datasets
-
 # Load data and show the first rows
 # df = pd.read_csv("Advertising.csv")
 # df.head()
@@ -35,14 +34,17 @@ def initialize(dim):
     theta = np.random.rand(dim)
     return b, theta
 
+
 # Prediction function
 def predict_Y(b, theta, X):
     return b + np.dot(X, theta)
+
 
 # Cost function
 def get_cost(Y, Y_hat):
     Y_resd = Y - Y_hat
     return np.sum(np.dot(Y_resd.T, Y_resd)) / len(Y - Y_resd)
+
 
 # Gradient descent step
 def update_theta(x, y, y_hat, b_0, theta_o, learning_rate):
@@ -52,10 +54,12 @@ def update_theta(x, y, y_hat, b_0, theta_o, learning_rate):
     theta_1 = theta_o - learning_rate * dw
     return b_1, theta_1, db, dw
 
+
 # Modified gradient descent step
 def update_theta_proposed(x, y, y_hat, b_0, theta_o, learning_rate, wpr, bpr, k):
-    db = (np.sum(y_hat - y) * 2) / len(y)
-    dw = (np.dot((y_hat - y), x) * 2) / len(y)
+    m = len(y)
+    dw = 2 * np.dot(x.T, y_hat - y) / m
+    db = 2 * np.sum(y_hat - y) / m
     b_1 = b_0 - learning_rate * (k * db + (1 - k) * bpr)
     theta_1 = theta_o - learning_rate * (k * dw + (1 - k) * wpr)
     return b_1, theta_1, db, dw
@@ -91,29 +95,29 @@ def stochastic_gradient_descent(iterations, b, theta, lr):
     
     return costs, weights
 
-# Modified gradient descent function
-def proposed_descent(iterations, b, theta, lr):
+
+# Proposed gradient descent function
+def proposed_descent(iterations, b, theta, lr, jump_size):
     
     costs = []
     weights = []
-    md_list = [None] * iterations
-    bd_list = [None] * iterations
+    md_list = []
+    bd_list = []
 
-    for i in range(iterations):
-        if i == 0:
-            Y_hat = predict_Y(b, theta, X)
-            costs.append(get_cost(Y, Y_hat))
-            weights.append(theta)
-            b, theta, db0, dw0 = update_theta(X, Y, Y_hat, b, theta, lr)
-            md_list[i] = dw0
-            bd_list[i] = db0
-        else:
-            Y_hat = predict_Y(b, theta, X)
-            costs.append(get_cost(Y, Y_hat))
-            weights.append(theta)
-            b, theta, db0, dw0 = update_theta_proposed(X, Y, Y_hat, b, theta, lr, md_list[i - 1], bd_list[i - 1], 0.5)
-            md_list[i] = dw0
-            bd_list[i] = db0
+    Y_hat = predict_Y(b, theta, X)
+    costs.append(get_cost(Y, Y_hat))
+    weights.append(theta)
+    b, theta, db0, dw0 = update_theta(X, Y, Y_hat, b, theta, lr)
+    md_list.append(dw0)
+    bd_list.append(db0)
+
+    for i in range(1, iterations, jump_size):            
+        Y_hat = predict_Y(b, theta, X)
+        costs.append(get_cost(Y, Y_hat))
+        weights.append(theta)
+        b, theta, db0, dw0 = update_theta_proposed(X, Y, Y_hat, b, theta, lr, md_list[-1], bd_list[-1], 0.5)
+        md_list.append(dw0)
+        bd_list.append(db0)
                        
     weights = np.array(weights).T
     
@@ -124,36 +128,41 @@ def gradient_descent(iterations, b, theta, lr):
 
     costs = []
     weights = []
-    db_list = []
-    dw_list = []
 
     for i in range(iterations):
         Y_hat = predict_Y(b, theta, X)
         costs.append(get_cost(Y, Y_hat))
         weights.append(theta)
         b, theta, db, dw = update_theta(X, Y, Y_hat, b, theta, lr)
-        db_list.append(db)
-        dw_list.append(dw)
+ 
     weights = np.array(weights).T
 
-    return costs, weights, db_list, dw_list
+    return costs, weights
 
+LR_LIST = [0.00001, 0.01, 0.005, 0.001]
+ITER_LIST = [1000, 10_000, 50_000]
 # Define the number of iterations, bias, weights, and learning rate
-it = 45_000
+it = 1_000
+lr = 0.001
+
+time_results = {}
+
+
 bias, weig = initialize(X.shape[1])
-lr = 0.0001
+
+results = {}
 
 times_dict = {}
 
 # Measure the execution time of the modified function
 start = time.time()
-proposed_costs, proposed_weights = proposed_descent(it, bias, weig, lr)
+proposed_costs, proposed_weights = proposed_descent(it, bias, weig, lr, jump_size=3)
 end = time.time()
 times_dict["proposed_time_elapsed"] = end - start
 
 # Calculate costs, biases, and weights for the gradient descent function
 start = time.time()
-gradient_costs, gradient_weights, db, dw = gradient_descent(it, bias, weig, lr)
+gradient_costs, gradient_weights = gradient_descent(it, bias, weig, lr)
 end = time.time()
 times_dict["gradient_time_elapsed"] = end - start
 
@@ -165,15 +174,23 @@ stochastic_time_elapsed = end - start
 times_dict["stochastic_time_elapsed"] = stochastic_time_elapsed
 
 ## Getting fastest algo
-fastest_algo = min(times_dict.items(), key=lambda x: x[1])
-print("fastest_algo: ", fastest_algo)
+# fastest_algo = min(times_dict.items(), key=lambda x: x[1])
+# print("fastest_algo: ", fastest_algo)
 
-costs_dict = {"stochastic_gradient_descent_costs":stochastic_gradient_descent_costs[-1], 
-              "gradient_costs":gradient_costs[-1],
-              "proposed_costs":proposed_costs[-1]}
+results = {"stochastic_gradient_descent_costs":stochastic_gradient_descent_costs, 
+              "gradient_costs":gradient_costs,
+              "proposed_costs":proposed_costs}
+# df = pd.DataFrame.from_dict(results)
+# df.to_csv(f"results_iris_lr{lr}_iter{it}.csv", index=False)
+latest_values = {key: value[-1] for key, value in results.items()}
+print(latest_values)
+# print cost lengths
+for k,v in results.items():
+    print(k, len(v))
+# lowest_cost_algo = min(results.items(), key=lambda x: x[1])
+# print("lowest_cost_algo: ", lowest_cost_algo)
 
-lowest_cost_algo = min(costs_dict.items(), key=lambda x: x[1])
-print("lowest_cost_algo: ", lowest_cost_algo)
+print(f"GD: {len(gradient_costs)}\nSGD: {len(stochastic_gradient_descent_costs)}\nProposed: {len(proposed_costs)}")
 
 # # Create figure with two subplots in one row
 # fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 5))
