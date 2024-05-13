@@ -89,9 +89,9 @@ class GradientDescent(LinearRegressor):
 
             self.b, self.theta = self.update_theta(X, Y, Y_hat, lr)
 
-        self.weights = np.array(self.weights).T
+        weights = np.array(self.weights).T
 
-        return self.costs, self.weights
+        return self.costs, weights
 
 
 class ProposedDescent(LinearRegressor):
@@ -163,8 +163,8 @@ class ProposedDescent(LinearRegressor):
         - costs (list): cost history during iterations
         - weights (numpy array): weight history during iterations
         """
-        md_list = []
-        bd_list = []
+        weight_d_list = []
+        bias_d_list = []
 
         Y_hat = self.predict_Y(X, self.b, self.theta)
         self.costs.append(self.get_cost(Y, Y_hat))
@@ -172,22 +172,22 @@ class ProposedDescent(LinearRegressor):
 
         self.b, self.theta, db0, dw0 = self.update_theta(X, Y, Y_hat, lr)
 
-        md_list.append(dw0)
-        bd_list.append(db0)
+        weight_d_list.append(dw0)
+        bias_d_list.append(db0)
 
-        for i in range(1, iterations, jump_size):
+        for i in range(0, iterations, jump_size):
 
             Y_hat = self.predict_Y(X, self.b, self.theta)
             self.costs.append(self.get_cost(Y, Y_hat))
             self.weights.append(self.theta)
 
             self.b, self.theta, db0, dw0 = self.update_theta_proposed(
-                X, Y, Y_hat, self.b, self.theta, lr, md_list[-1], bd_list[-1], 0.5)
+                X, Y, Y_hat, self.b, self.theta, lr, weight_d_list[-1], bias_d_list[-1], 0.5)
 
-            md_list.append(dw0)
-            bd_list.append(db0)
+            weight_d_list.append(dw0)
+            bias_d_list.append(db0)
 
-        weights = np.array(self.weights).T
+        self.weights = np.array(self.weights).T
 
         return self.costs, self.weights
 
@@ -232,8 +232,7 @@ class StochasticDescent(LinearRegressor):
         - costs (list): cost history during iterations
         - weights (numpy array): weight history during iterations
         """
-        costs = []
-        weights = []
+
         b = self.b
         theta = self.theta
 
@@ -245,6 +244,6 @@ class StochasticDescent(LinearRegressor):
             self.costs.append(cost)
             self.weights.append(theta)
 
-        weights = np.array(weights).T
+        self.weights = np.array(self.weights).T
 
         return self.costs, self.weights

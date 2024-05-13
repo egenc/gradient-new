@@ -18,7 +18,6 @@ X = iris.data
 Y = iris.target
 # Print data shape
 # print(X.shape, Y.shape)
-print(Y)
 '''
 # Uncomment this code to use the loaded csv instead of the iris dataset
 # Slice features and target from the advertising dataset
@@ -55,8 +54,11 @@ times_dict = {}
 start = time.time()
 
 PD = ProposedDescent(weig, bias)
-proposed_costs, proposed_weights = PD.fit(X, Y, iterations=it, lr=lr, jump_size=2)
+proposed_costs_1, proposed_weights = PD.fit(X, Y, iterations=it, lr=lr, jump_size=2)
 
+
+PD_2 = ProposedDescent(weig, bias)
+proposed_costs_2, proposed_weights = PD_2.fit(X, Y, iterations=it, lr=lr, jump_size=3)
 end = time.time()
 times_dict["gradient_time_elapsed"] = end - start
 
@@ -77,13 +79,10 @@ end = time.time()
 stochastic_time_elapsed = end - start
 times_dict["stochastic_time_elapsed"] = stochastic_time_elapsed
 
-## Getting fastest algo
-# fastest_algo = min(times_dict.items(), key=lambda x: x[1])
-# print("fastest_algo: ", fastest_algo)
-
 results = {"stochastic_gradient_descent_costs":stochastic_gradient_descent_costs, 
               "gradient_costs":gradient_costs,
-              "proposed_costs":proposed_costs}
+              "proposed_costs_1":proposed_costs_1,
+              "proposed_costs_2":proposed_costs_2}
 
 series_dict = {}
 for k, v in results.items():
@@ -94,11 +93,10 @@ df = pd.DataFrame(series_dict)
 
 df.to_csv(f"C:/Users/ERDG/Documents/repos/results/iris_lr{lr}_iter{it}.csv", index=False)
 
-times_df = pd.DataFrame.from_dict(times_dict)
-times_df.to_csv(f"C:/Users/ERDG/Documents/repos/results/TIMES_iris_lr{lr}_iter{it}.csv", index=False)
+# times_df = pd.DataFrame.from_dict(times_dict)
+# times_df.to_csv(f"C:/Users/ERDG/Documents/repos/results/TIMES_iris_lr{lr}_iter{it}.csv", index=False)
 
 
-print(f"GD: {len(gradient_costs)}\nSGD: {len(stochastic_gradient_descent_costs)}\nProposed: {len(proposed_costs)}")
 
 # # Create figure with two subplots in one row
 # fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 5))

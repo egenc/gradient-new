@@ -9,14 +9,13 @@ from sklearn import datasets
 import os
 from methods import GradientDescent, ProposedDescent, StochasticDescent
 
-
-dataset = "diabetes"
+dataset = "iris"
 SAVE_DIR = f"C:/Users/ERDG/Documents/repos/results/gradient-new/{dataset}/"
-os.makedirs(SAVE_DIR, exist_ok=True)
-data = datasets.load_diabetes()
 
-X = data.data
+data = datasets.load_iris()
+X= data.data
 Y = data.target
+os.makedirs(SAVE_DIR, exist_ok=True)
 
 # df = pd.read_csv("C:/Users/ERDG/Documents/repos/gradient-new/Advertising.csv")
 
@@ -101,3 +100,4 @@ for it in ITER_LIST:
             times_dict, orient="index")
         times_df.to_csv(
             f"{SAVE_DIR}/TIMES_{dataset}_lr{lr}_iter{it}.csv", index_label="model_name")
+        break
